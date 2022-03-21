@@ -11,14 +11,14 @@ function reducer(state, action) {
     case "SUCCESS":
       return {
         loading: false,
-        data: action.data,
+        data: action.payload,
         error: null,
       };
     case "ERROR":
       return {
         loading: false,
         data: null,
-        error: action.error,
+        error: action.payload,
       };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -29,25 +29,22 @@ function useAsync(callback, deps = [], skip = false) {
   const [state, dispatch] = useReducer(reducer, {
     loading: false,
     data: null,
-    error: false,
+    error: null,
   });
 
   const fetchData = async () => {
     dispatch({ type: "LOADING" });
     try {
       const data = await callback();
-      console.log(data);
-      dispatch({ type: "SUCCESS", data });
+      dispatch({ type: "SUCCESS", payload: data });
     } catch (error) {
-      dispatch({ type: "ERROR", error });
+      dispatch({ type: "ERROR", payload: error && error.message });
     }
   };
 
   useEffect(() => {
     if (skip) return;
-    console.log("EFFECT");
     fetchData();
-    // eslint 설정을 다음 줄에서만 비활성화
     // eslint-disable-next-line
   }, deps);
 

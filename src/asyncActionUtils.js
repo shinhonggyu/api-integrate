@@ -1,4 +1,4 @@
-function createAsyncDispatcher(type, promiseFn) {
+export function createAsyncDispatcher(type, promiseFn) {
   const SUCCESS = `${type}_SUCCESS`;
   const ERROR = `${type}_ERROR`;
 
@@ -6,13 +6,70 @@ function createAsyncDispatcher(type, promiseFn) {
     dispatch({ type });
     try {
       const data = await promiseFn(...rest);
-      dispatch({ type: SUCCESS, data });
+      dispatch({
+        type: SUCCESS,
+        payload: data,
+      });
     } catch (error) {
-      dispatch({ type: ERROR, error });
+      dispatch({
+        type: ERROR,
+        payload: error && error.message,
+      });
     }
   }
 
   return actionHandler;
 }
 
-export default createAsyncDispatcher;
+export const initialAsyncState = {
+  loading: false,
+  data: null,
+  error: null,
+};
+
+const loadingState = {
+  loading: true,
+  data: null,
+  error: null,
+};
+
+const success = (data) => ({
+  loading: false,
+  data,
+  error: null,
+});
+
+const error = (error) => ({
+  loading: false,
+  data: null,
+  error,
+});
+
+export function createAsyncHandler(type, key) {
+  const SUCCESS = `${type}_SUCCESS`;
+  const ERROR = `${type}_ERROR`;
+
+  function handler(state, action) {
+    switch (action.type) {
+      case type:
+        return {
+          ...state,
+          [key]: loadingState,
+        };
+      case SUCCESS:
+        return {
+          ...state,
+          [key]: success(action.payload),
+        };
+      case ERROR:
+        return {
+          ...state,
+          [key]: error(action.payload),
+        };
+      default:
+        return state;
+    }
+  }
+
+  return handler;
+}

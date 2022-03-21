@@ -1,19 +1,16 @@
-import React, { useEffect } from "react";
-import { getUser } from "./UsersContext";
-import { useUsersState, useUsersDispatch } from "./UsersContext";
+import { useEffect } from "react";
+import { useUsersState, useUsersDispatch, getUser } from "./UsersContext";
 
-function User({ id }) {
+const User = ({ id }) => {
   const state = useUsersState();
   const dispatch = useUsersDispatch();
-
   const { loading, data: user, error } = state.user;
 
   useEffect(() => {
     getUser(dispatch, id);
   }, [dispatch, id]);
 
-  console.log("USER");
-  if (loading) return <div>로딩중...</div>;
+  if (loading) return <div>로딩중..</div>;
   if (error) return <div>에러가 발생했습니다</div>;
   if (!user) return null;
 
@@ -25,6 +22,6 @@ function User({ id }) {
       </p>
     </div>
   );
-}
+};
 
 export default User;
